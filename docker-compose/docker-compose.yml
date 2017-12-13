@@ -1,0 +1,131 @@
+version: "3"
+services:
+  plex:
+    image: plexinc/pms-docker
+    container_name: plex-media-server
+    restart: always
+    hostname: second-life
+    network_mode: host
+    volumes:
+      - /opt/appdata/plex:/config
+      - /opt/storage/plex-media/anime-tv-series:/data/anime-tv-series
+      - /opt/storage/plex-media/anime-movies:/data/anime-movies
+      - /opt/storage/plex-media/anisong:/data/anisong
+      - /tmp/plex-transcode:/transcode
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+
+  plexpy:
+    image: linuxserver/plexpy
+    container_name: plexpy
+    restart: always
+    ports:
+      - 8181:8181
+    volumes:
+      - /opt/appdata/plexpy:/config
+      - /opt/appdata/plex/Library/Application\ Support/Plex\ Media\ Server/Logs:/logs:ro
+    depends_on:
+      - plex
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+
+  deluge:
+    image: linuxserver/deluge
+    container_name: deluge
+    restart: always
+    network_mode: host
+    volumes:
+      - /opt/appdata/deluge:/config
+      - /opt/storage/torrents:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+
+  nzbget:
+    image: linuxserver/nzbget
+    container_name: nzbget
+    restart: always
+    ports:
+      - 6789:6789
+    volumes:
+      - /opt/appdata/nzbget:/config
+      - /opt/storage/nbzget:/downloads
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    restart: always
+    network_mode: host
+    volumes:
+      - /opt/appdata/sonarr:/config
+      - /opt/storage/sonarr:/tv
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    restart: always
+    network_mode: host
+    volumes:
+      - /opt/appdata/radarr:/config
+      - /opt/storage/radarr:/movies
+      - /opt/storage/torrents:/downloads
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    restart: always
+    network_mode: host
+    volumes:
+      - /opt/storage/torrents:/downloads
+      - /opt/appdata/jackett:/config
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+  nextcloud:
+    image: linuxserver/nextcloud
+    container_name: nextcloud
+    restart: always
+    ports:
+      - 8080:443
+    volumes:
+      - /opt/appdata/nextcloud:/config
+      - /opt/storage/nextcloud:/data
+    environment:
+      - PGID=1000
+      - PUID=1000
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    network_mode: host
+    volumes:
+      - /opt/appdata/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: always
+    network_mode: host
+    volumes:
+      - /opt/appdata/nginx/conf.d:/etc/nginx/conf.d
+
+# vim: set ts=2 sw=2 expandtab

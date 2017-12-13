@@ -1,0 +1,14 @@
+#!/bin/bash
+PLEX_DIR="/opt/appdata/plex/Library/Application Support/Plex Media Server"
+echo "Start installing"
+cd "$PLEX_DIR/Plug-ins"
+git clone https://github.com/ZeroQI/Hama.bundle.git -b Beta-Agent
+cd "$PLEX_DIR/Plug-in Support/Data"
+mkdir -p com.plexapp.agents.hama/DataItems/{AniDB,Plex,OMDB,TMDB,TVDB/{blank,_cache/fanart/original,episodes,fanart/{original,vignette},graphical,posters,seasons,seasonswide,text},FanartTV}
+chmod -R 775 com.plexapp.agents.hama
+mkdir -p "$PLEX_DIR/Scanners/Series"
+cd "$PLEX_DIR/Scanners/Series"
+curl https://raw.githubusercontent.com/ZeroQI/Absolute-Series-Scanner/Beta/Scanners/Series/Absolute%20Series%20Scanner.py -o "Absolute Series Scanner.py"
+cd "$PLEX_DIR"
+chmod -R 775 -R Scanners
+
