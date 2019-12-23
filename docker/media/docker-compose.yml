@@ -1,0 +1,104 @@
+version: "2"
+services:
+  plex:
+    image: plexinc/pms-docker
+    container_name: plex
+    restart: unless-stopped
+    hostname: second-life
+    networks:
+      - media
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      # - 1900:1900/udp - for some reason, this port was taken by other process
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    volumes:
+      - /opt/appdata/plex:/config
+      - /mnt/storage:/storage
+      - /tmp/plex-transcode:/transcode
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+      - PUID=1000
+      - PGID=1000
+
+  tautulli:
+    image: linuxserver/tautulli
+    container_name: tautuli
+    restart: always
+    networks:
+      - media
+    ports:
+      - 8181:8181
+    volumes:
+      - /opt/appdata/tautuli:/config
+      - /opt/appdata/plex/Library/Application\ Support/Plex\ Media\ Server/Logs:/plex_logs:ro
+    depends_on:
+      - plex
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+
+  sonarr:
+    image: linuxserver/sonarr:preview
+    container_name: sonarr
+    restart: always
+    networks:
+      - media
+    ports:
+      - 8989:8989
+    volumes:
+      - /opt/appdata/sonarr:/config
+      - /opt/storage/anime-airing:/tv
+      - /opt/storage/tv-series:/other-tvs
+      - /opt/storage/downloads:/downloads
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    restart: always
+    networks:
+      - media
+    ports:
+      - 7878:7878
+    volumes:
+      - /opt/appdata/radarr:/config
+      - /opt/storage/movies:/movies
+      - /opt/storage/anime-movies:/anime-movies
+      - /opt/storage/downloads:/downloads
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    restart: always
+    networks:
+      - media
+    ports:
+      - 10004:9117
+    volumes:
+      - /opt/storage/downloads:/downloads
+      - /opt/appdata/jackett:/config
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Asia/Ho_Chi_Minh
+
+networks:
+  media:
+
+# vim: set ts=2 sw=2 expandtab
